@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ideal Track | Precificação Enterprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;650;750&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f6fc; --panel:#ffffff; --line:#e1e8f3; --line-soft:#eef1f6; --bar:#e8edf5; --kpi-label:#62728a; --focus:#3065df;
+  --ink:#182438; --ink-strong:#142447; --muted:#68768e; --muted-2:#718096;
+  --brand:#1654db; --brand-ink:#163b9b; --brand-soft:#e8eefc; --brand-soft-ink:#12398d;
+  --kpi:#f3f7ff; --head:#101b38; --head-sub:#b9c7e8; --head-eyebrow:#83a9ff;
+  --ok-bg:#e8f6ed; --ok:#11663d; --warn-bg:#fff2d8; --warn:#90600a; --bad-bg:#ffebef; --bad:#a52f45;
+  --note-bg:#fffaef; --note-line:#e4a729; --input:#ffffff; --input-line:#cbd5e5;
+  --shadow:0 5px 25px #142e5010;
+  font-family:Inter,Arial,sans-serif; color:var(--ink); color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:var(--head);color:#fff;padding:29px max(22px,calc((100% - 1180px)/2))}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--head-eyebrow);font-weight:750}
+h1{margin:4px 0;font-size:26px}
+header .sub{color:var(--head-sub)}
+.wrap{max-width:1180px;margin:25px auto;padding:0 18px}
+.cols{display:grid;grid-template-columns:1.1fr .9fr;gap:19px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:24px;margin-bottom:18px;box-shadow:var(--shadow)}
+h2{font-size:18px;margin:0 0 8px}
+h3{font-size:14px;margin:18px 0 8px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+label,.label{font-size:13px;font-weight:650}
+output.calcout.fixed{color:var(--ink-strong);font-weight:650;background:var(--brand-soft)}
+output.calcout{display:block;border:1px solid var(--input-line);border-radius:8px;padding:11px;font-size:15px;font-weight:750;color:var(--brand-ink);background:var(--kpi);font-variant-numeric:tabular-nums}
+input,select{width:100%;border:1px solid var(--input-line);border-radius:8px;padding:11px;font-size:15px;color:var(--ink-strong);background:var(--input);font-family:inherit}
+input:focus,select:focus{outline:2px solid #3065df55;border-color:var(--focus)}
+button:focus-visible{outline:2px solid #3065df55;outline-offset:2px}
+input[type=number]{font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+.bar{border-top:1px solid var(--bar);margin:18px 0}
+.full{grid-column:1/-1}
+
+/* Seletor de motores */
+.engines{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.engine{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 8px 11px;border:1.5px solid var(--input-line);border-radius:12px;background:var(--input);color:var(--ink);cursor:pointer;font-family:inherit;text-align:center;position:relative;transition:border-color .15s,background .15s}
+.engine .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:12px;font-weight:750;color:#fff;letter-spacing:.02em;opacity:.45;transition:opacity .15s}
+.engine .nm{font-size:13px;font-weight:650;line-height:1.2}
+.engine .co{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.engine[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft)}
+.engine[aria-pressed="true"] .ico{opacity:1}
+.engine[aria-pressed="true"]::after{content:"";position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2l2.6 2.6L12 5.4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
+.engine-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.linkbtn{background:none;border:0;padding:0;color:var(--brand-ink);font-weight:650;font-size:12px;cursor:pointer;font-family:inherit}
+
+/* Tabela de custos por motor */
+.costs{width:100%;border-collapse:collapse;font-size:13px}
+.costs th{text-align:left;font-weight:650;color:var(--muted);font-size:12px;padding:0 0 6px}
+.costs td{padding:5px 0;border-top:1px solid var(--line-soft);vertical-align:middle}
+.costs td:last-child{width:130px}
+.costs input{padding:7px 9px;font-size:14px}
+.tablewrap{overflow-x:auto}
+
+/* Resultado */
+.cardrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.cardrow strong{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cardrow.sub{padding:5px 0 5px 14px;font-size:13px;color:var(--muted)}
+.cardrow.sub strong{font-weight:500}
+.cardrow.total{font-weight:750;color:var(--brand-ink)}
+.engine .ico{background:var(--brand)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.kpi{background:var(--kpi);border-radius:10px;padding:16px}
+.kpi span{display:block;color:var(--kpi-label);font-size:12px}
+.kpi b{display:block;font-size:23px;margin-top:5px;font-variant-numeric:tabular-nums}
+.status{padding:13px;border-radius:9px;font-weight:700;background:var(--ok-bg);color:var(--ok)}
+.status.warn{background:var(--warn-bg);color:var(--warn)}
+.status.bad{background:var(--bad-bg);color:var(--bad)}
+.notice{border-left:4px solid var(--note-line);background:var(--note-bg);padding:13px;font-size:13px;line-height:1.5;border-radius:5px;margin:14px 0 0}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
+button.btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:12px 16px;font-weight:650;cursor:pointer;font-family:inherit;font-size:14px}
+button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
+@media (max-width:780px){
+  .cols,.fields{grid-template-columns:1fr}
+  .engines{grid-template-columns:repeat(2,minmax(0,1fr))}
+  header{padding:24px}
+  .kpi b{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  :root{--bg:#fff;--panel:#fff;--kpi:#f3f7ff}
+  body{background:#fff}
+  .panel{box-shadow:none;break-inside:avoid}
+  .controls,.linkbtn{display:none}
+  .cols{display:block}
+  input,select{border:0;padding:2px}
+  .wrap{margin:0}
+  .engine[aria-pressed="false"]{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">IDEAL TRACK · USO INTERNO COMERCIAL</div>
+  <h1>Calculadora de precificação Enterprise</h1>
+  <div class="sub">Configure cada contrato e receba o valor do plano calculado pela margem mínima.</div>
+</header>
+
+<main class="wrap">
+<div class="cols">
+<div>
+  <section class="panel">
+    <h2>01 · Configuração comercial</h2>
+    <p class="hint">As quotas são mensais, exceto a frequência de coleta.</p>
+    <div class="fields" style="margin-top:14px">
+      <div class="field full">
+        <label for="client">Cliente / oportunidade</label>
+        <input id="client" value="Cliente exemplo">
+      </div>
+      <div class="field">
+        <span class="label" id="base-label">Valor sugerido do plano</span>
+        <output id="base" class="calcout" aria-labelledby="base-label" aria-live="polite">—</output>
+        <span class="hint">Calculado a partir dos custos do plano e da margem mínima, arredondado para cima em R$ 10.</span>
+      </div>
+      <div class="field">
+        <label for="discount">Desconto ofertado (%)</label>
+        <input id="discount" type="number" value="0" min="0" max="99" step="0.5">
+      </div>
+      <div class="field">
+        <label for="prompts">Prompts do plano</label>
+        <input id="prompts" type="number" value="500" min="1">
+      </div>
+      <div class="field">
+        <label for="freq">Frequência de coleta</label>
+        <select id="freq">
+          <option value="4.33">Semanal</option>
+          <option value="30">Diária</option>
+        </select>
+      </div>
+
+      <div class="field full" role="group" aria-labelledby="engines-label">
+        <span class="label" id="engines-label">Motores de IA do plano</span>
+        <p class="hint">Toque para incluir ou retirar. O valor de cada motor já considera as repetições por coleta.</p>
+        <div class="engines" id="engines"></div>
+        <div class="engine-meta">
+          <span id="engine-count">—</span>
+          <span><button type="button" class="linkbtn" id="all">Selecionar todos</button> · <button type="button" class="linkbtn" id="none">Limpar</button></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="reps-label">Repetições por coleta</span>
+        <output id="reps" class="calcout fixed" aria-labelledby="reps-label">3</output>
+        <span class="hint">Quantas vezes cada prompt roda em cada motor, a cada coleta.</span>
+      </div>
+      <div class="field">
+        <label for="credits">Créditos do plano / mês</label>
+        <input id="credits" type="number" value="590" min="0">
+        <span class="hint">Cada crédito vale uma conversa de chat ou um conteúdo do IdealAgent.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>02 · Premissas internas editáveis</h2>
+    <p class="hint">Custos medidos em setembro de 2026 a partir de amostras reais, pelo percentil 90 das respostas (9 em cada 10 respostas custam até esse valor). Gemini com preço de 2027 e margem de 1,5×, DeepSeek no horário de pico e Perplexity no contexto de busca mais baixo, a confirmar com o time. Mantenha 100% da quota para simular a capacidade contratada.</p>
+
+    <h3>Custo por coleta de cada motor (US$)</h3>
+    <div class="tablewrap">
+      <table class="costs" id="costtable">
+        <thead><tr><th>Motor</th><th>US$ por prompt</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="fields" style="margin-top:16px">
+      <div class="field">
+        <label for="cc">Custo por crédito (US$)</label>
+        <input id="cc" type="number" value="0.0728" min="0" step="0.0001">
+        <span class="hint">Média entre uma conversa de chat (US$ 0,0293) e um conteúdo do IdealAgent (US$ 0,1163), ambos com margem de 1,5×.</span>
+      </div>
+      <div class="field">
+        <label for="fx">Câmbio (R$ por US$)</label>
+        <input id="fx" type="number" value="5.50" min="0" step="0.01">
+        <span class="hint">Use a cotação do dia com folga.</span>
+      </div>
+      <div class="field">
+        <label for="fxtax">Tributos sobre serviços do exterior (%)</label>
+        <input id="fxtax" type="number" value="0" min="0" max="100" step="0.5">
+        <span class="hint">Percentual a confirmar com o contador.</span>
+      </div>
+      <div class="field">
+        <label for="util">Utilização da quota (%)</label>
+        <input id="util" type="number" value="100" min="0" max="100" step="5">
+      </div>
+      <div class="field">
+        <label for="tax">Impostos (%)</label>
+        <input id="tax" type="number" value="10" min="0" max="100" step="0.5">
+      </div>
+      <div class="field">
+        <label for="gateway">Gateway (%)</label>
+        <input id="gateway" type="number" value="4" min="0" max="100" step="0.5">
+      </div>
+      <div class="field">
+        <label for="infra">Infra base (R$/mês)</label>
+        <input id="infra" type="number" value="70" min="0">
+      </div>
+      <div class="field">
+        <label for="support">Suporte base (R$/mês)</label>
+        <input id="support" type="number" value="200" min="0">
+      </div>
+      <div class="field">
+        <label for="margin">Margem mínima (%)</label>
+        <input id="margin" type="number" value="30" min="0" max="99" step="1">
+      </div>
+      <div class="field">
+        <label for="manager">Teto de desconto do gestor (%)</label>
+        <input id="manager" type="number" value="10" min="0" max="99" step="1">
+      </div>
+    </div>
+    <p class="notice">O limite de 10% para aprovação gerencial é <b>provisório</b> e ainda não é uma política validada da Ideal Track. Altere após aprovação da liderança. Qualquer desconto exige aprovação, e margem abaixo da mínima fica bloqueada neste modelo.</p>
+  </section>
+</div>
+
+<div>
+  <section class="panel">
+    <h2>03 · Resultado da simulação</h2>
+    <div class="kpis">
+      <div class="kpi"><span>Preço mensal ofertado</span><b id="net">—</b></div>
+      <div class="kpi"><span>Margem de contribuição</span><b id="marg">—</b></div>
+      <div class="kpi"><span>Preço mínimo econômico</span><b id="floor">—</b></div>
+      <div class="kpi"><span>Desconto máximo pela margem</span><b id="maxdisc">—</b></div>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite">—</div>
+    <div class="bar"></div>
+    <h2>04 · Memória de cálculo mensal</h2>
+    <div id="ledger"></div>
+    <div class="bar"></div>
+    <h2>05 · Limites e escopo</h2>
+    <div class="notice">Margem de contribuição = (mensalidade com desconto – impostos – gateway – custos variáveis de uso – infraestrutura – suporte) ÷ mensalidade com desconto. <b>Não é lucro líquido:</b> não inclui CAC, comissões, pessoal fixo, implantação nem despesas corporativas. O piso não é preço de mercado nem política comercial aprovada.</div>
+    <div class="notice">A margem de 1,5× cobre o raciocínio do Gemini e o contexto do chat e do IdealAgent, que não aparecem nas respostas medidas, até termos o consumo real de produção. Os demais motores não têm esse custo oculto enquanto o raciocínio e a busca na web estiverem desligados. Se isso mudar, ou se o ChatGPT trocar de modelo, os custos precisam ser revistos. Preços de fornecedores consultados em 23/09/2026 e sujeitos a mudança.</div>
+    <div class="controls">
+      <button type="button" class="btn" onclick="window.print()">Imprimir / salvar proposta em PDF</button>
+      <button type="button" class="btn secondary" onclick="location.reload()">Restaurar parâmetros</button>
+    </div>
+    <p class="hint">Modelo interno. Nenhum dado é enviado a servidores, e as alterações não ficam gravadas ao fechar a página.</p>
+  </section>
+</div>
+</div>
+</main>
+
+<script>
+const ENGINES=[
+  {id:'chatgpt',   name:'ChatGPT',            code:'GPT', cost:0.00020, on:true},
+  {id:'aio',       name:'Google AI Overview', code:'AIO', cost:0.00295, on:true},
+  {id:'aimode',    name:'Google AI Mode',     code:'AIM', cost:0.00295, on:true},
+  {id:'gemini',    name:'Gemini',             code:'GEM', cost:0.01175, on:true},
+  {id:'perplexity',name:'Perplexity',         code:'PPX', cost:0.00554, on:true},
+  {id:'claude',    name:'Claude',             code:'CLD', cost:0.00490, on:true},
+  {id:'grok',      name:'Grok',               code:'GRK', cost:0.00198, on:true},
+  {id:'deepseek',  name:'DeepSeek',           code:'DSK', cost:0.00070, on:true}
+];
+const $=x=>document.getElementById(x), v=x=>Number($(x).value);
+const unit=x=>Number.isFinite(x)?x.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:4,maximumFractionDigits:4}):'—';
+const money=x=>Number.isFinite(x)?x.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';
+const pct=x=>Number.isFinite(x)?(100*x).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%':'—';
+const n=x=>Math.round(x).toLocaleString('pt-BR');
+const line=(name,amount,cls='')=>`<div class="cardrow ${cls}"><span>${name}</span><strong>${amount}</strong></div>`;
+
+// Monta seletor e tabela de custos
+const grid=$('engines'), tbody=document.querySelector('#costtable tbody');
+ENGINES.forEach(e=>{
+  const b=document.createElement('button');
+  b.type='button'; b.className='engine'; b.id='eng-'+e.id; b.setAttribute('aria-pressed',e.on);
+  b.innerHTML=`<span class="ico" aria-hidden="true">${e.code}</span><span class="nm">${e.name}</span><span class="co" id="co-${e.id}">—</span>`;
+  b.addEventListener('click',()=>{e.on=!e.on;b.setAttribute('aria-pressed',e.on);calc();});
+  grid.appendChild(b);
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${e.name}</td><td><input type="number" id="c-${e.id}" value="${e.cost}" min="0" step="0.00001" aria-label="Custo por prompt do ${e.name} em dólar"></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('input').addEventListener('input',ev=>{e.cost=Number(ev.target.value);calc();});
+});
+$('all').addEventListener('click',()=>{ENGINES.forEach(e=>{e.on=true;$('eng-'+e.id).setAttribute('aria-pressed',true)});calc();});
+$('none').addEventListener('click',()=>{ENGINES.forEach(e=>{e.on=false;$('eng-'+e.id).setAttribute('aria-pressed',false)});calc();});
+
+const REPS=3;
+const ids=['discount','prompts','freq','credits','cc','fx','fxtax','util','tax','gateway','infra','support','margin','manager'];
+
+function calc(){
+  const discount=v('discount')/100;
+  const fxEff=v('fx')*(1+v('fxtax')/100);
+  const collections=v('prompts')*REPS*v('freq');
+  const usage=v('util')/100, rate=v('tax')/100+v('gateway')/100, min=v('margin')/100;
+  const sel=ENGINES.filter(e=>e.on);
+  const perEngine=sel.map(e=>({name:e.name,value:e.cost*fxEff*collections*usage}));
+  const monitor=perEngine.reduce((a,b)=>a+b.value,0);
+  const credits=v('credits')*v('cc')*fxEff*usage;
+  const infra=v('infra'), support=v('support');
+  const fixed=monitor+credits+infra+support;
+  const floor=1-rate-min>0?fixed/(1-rate-min):NaN;
+  const base=Number.isFinite(floor)?Math.ceil(floor/10)*10:NaN;
+  $('base').textContent=money(base);
+  const price=base*(1-discount), tax=price*rate, total=tax+fixed;
+  const contribution=price-total, margin=price>0?contribution/price:NaN;
+  const maxdisc=base>0&&Number.isFinite(floor)?Math.max(0,1-floor/base):NaN;
+
+  ENGINES.forEach(e=>{$('co-'+e.id).textContent=unit(e.cost*fxEff*REPS)+' por prompt'});
+  $('engine-count').textContent=sel.length===1?'1 motor selecionado':`${sel.length} motores selecionados`;
+
+  const valid=Number.isFinite(base)&&base>0&&discount>=0&&discount<1&&v('prompts')>0&&sel.length>0&&v('fx')>0
+    &&ids.every(id=>Number.isFinite(v(id))&&v(id)>=0)&&ENGINES.every(e=>Number.isFinite(e.cost)&&e.cost>=0)
+    &&rate+min<1&&v('util')<=100&&v('manager')<=99;
+
+  let status,cls='';
+  if(sel.length===0){status='SELECIONE AO MENOS UM MOTOR DE IA para calcular o plano';cls='bad'}
+  else if(!valid){status='REVISAR ENTRADAS: valores inválidos ou percentuais incompatíveis';cls='bad'}
+  else if(margin+1e-10<min){status='BLOQUEADO · A proposta não preserva a margem mínima';cls='bad'}
+  else if(discount===0){status='SEM DESCONTO · Closer pode encaminhar para validação interna'}
+  else if(discount<=v('manager')/100){status='APROVAÇÃO DO GESTOR · Desconto dentro da faixa provisória';cls='warn'}
+  else{status='APROVAÇÃO DA DIRETORIA · Desconto acima do teto gerencial provisório';cls='warn'}
+
+  $('net').textContent=money(price);
+  $('marg').textContent=pct(margin);
+  $('floor').textContent=money(floor);
+  $('maxdisc').textContent=pct(maxdisc);
+  $('status').className='status '+cls;
+  $('status').textContent=status;
+
+  $('ledger').innerHTML=
+    line('Prompts do plano',n(v('prompts')))+
+    line('Coletas/mês = prompts × repetições × frequência',n(collections))+
+    line('Respostas/mês = coletas × motores',n(collections*sel.length))+
+    line('Valor sugerido do plano',money(base))+line('Receita bruta mensal proposta (com desconto)',money(price))+
+    line('Impostos e gateway',money(tax))+
+    line('Monitoramento',money(monitor))+
+    perEngine.map(p=>line(p.name,money(p.value),'sub')).join('')+
+    line(`Créditos do plano (${n(v('credits'))} × ${unit(v('cc')*fxEff)})`,money(credits))+
+    line('Infraestrutura',money(infra))+
+    line('Suporte',money(support))+
+    line('Custos totais',money(total))+
+    line('Contribuição mensal',money(contribution))+
+    line('Margem de contribuição',pct(margin),'total');
+}
+ids.forEach(id=>$(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>
