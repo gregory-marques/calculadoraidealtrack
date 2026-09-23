@@ -35,7 +35,6 @@ h3{font-size:14px;margin:18px 0 8px}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .field{display:flex;flex-direction:column;gap:6px}
 label,.label{font-size:13px;font-weight:650}
-output.calcout.fixed{color:var(--ink-strong);font-weight:650;background:var(--brand-soft)}
 output.calcout{display:block;border:1px solid var(--input-line);border-radius:8px;padding:11px;font-size:15px;font-weight:750;color:var(--brand-ink);background:var(--kpi);font-variant-numeric:tabular-nums}
 input,select{width:100%;border:1px solid var(--input-line);border-radius:8px;padding:11px;font-size:15px;color:var(--ink-strong);background:var(--input);font-family:inherit}
 input:focus,select:focus{outline:2px solid #3065df55;border-color:var(--focus)}
@@ -136,8 +135,8 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
       <div class="field">
         <label for="freq">Frequência de coleta</label>
         <select id="freq">
+          <option value="30" selected>Diária</option>
           <option value="4.33">Semanal</option>
-          <option value="30">Diária</option>
         </select>
       </div>
 
@@ -152,8 +151,8 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
       </div>
 
       <div class="field">
-        <span class="label" id="reps-label">Repetições por coleta</span>
-        <output id="reps" class="calcout fixed" aria-labelledby="reps-label">3</output>
+        <label for="reps">Repetições por coleta</label>
+        <input id="reps" type="number" value="3" min="1" step="1">
         <span class="hint">Quantas vezes cada prompt roda em cada motor, a cada coleta.</span>
       </div>
       <div class="field">
@@ -166,7 +165,7 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
 
   <section class="panel">
     <h2>02 · Premissas internas editáveis</h2>
-    <p class="hint">Custos medidos em setembro de 2026 a partir de amostras reais, pelo percentil 90 das respostas (9 em cada 10 respostas custam até esse valor). Gemini com preço de 2027 e margem de 1,5×, DeepSeek no horário de pico e Perplexity no contexto de busca mais baixo, a confirmar com o time. Mantenha 100% da quota para simular a capacidade contratada.</p>
+    <p class="hint">Custos medidos em setembro de 2026 a partir de amostras reais, pelo percentil 90 das respostas (9 em cada 10 respostas custam até esse valor). Gemini com preço de 2027 e margem de 1,5×, DeepSeek no horário de pico e Perplexity no contexto de busca mais baixo, a confirmar com o time.</p>
 
     <h3>Custo por coleta de cada motor (US$)</h3>
     <div class="tablewrap">
@@ -184,21 +183,18 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
       </div>
       <div class="field">
         <label for="fx">Câmbio (R$ por US$)</label>
-        <input id="fx" type="number" value="5.50" min="0" step="0.01">
-        <span class="hint">Use a cotação do dia com folga.</span>
+        <input id="fx" type="number" value="5.40" min="0" step="0.01">
+        <span class="hint">Dólar comercial a R$ 5,10 em 22/09/2026, com cerca de 6% de folga para spread do cartão e oscilação. Revise a cada mês.</span>
       </div>
       <div class="field">
         <label for="fxtax">Tributos sobre serviços do exterior (%)</label>
-        <input id="fxtax" type="number" value="0" min="0" max="100" step="0.5">
-        <span class="hint">Percentual a confirmar com o contador.</span>
-      </div>
-      <div class="field">
-        <label for="util">Utilização da quota (%)</label>
-        <input id="util" type="number" value="100" min="0" max="100" step="5">
+        <input id="fxtax" type="number" value="40" min="0" max="100" step="0.5">
+        <span class="hint">IRRF, PIS/COFINS, ISS e IOF sobre o que é pago aos fornecedores de fora, com cálculo por dentro. Estimativa sem CIDE, a confirmar com o contador.</span>
       </div>
       <div class="field">
         <label for="tax">Impostos (%)</label>
         <input id="tax" type="number" value="10" min="0" max="100" step="0.5">
+        <span class="hint">Impostos sobre o valor cobrado do cliente, na nota fiscal. O percentual depende do regime tributário da empresa. Valor do modelo original, a confirmar com o contador.</span>
       </div>
       <div class="field">
         <label for="gateway">Gateway (%)</label>
@@ -286,18 +282,17 @@ ENGINES.forEach(e=>{
 $('all').addEventListener('click',()=>{ENGINES.forEach(e=>{e.on=true;$('eng-'+e.id).setAttribute('aria-pressed',true)});calc();});
 $('none').addEventListener('click',()=>{ENGINES.forEach(e=>{e.on=false;$('eng-'+e.id).setAttribute('aria-pressed',false)});calc();});
 
-const REPS=3;
-const ids=['discount','prompts','freq','credits','cc','fx','fxtax','util','tax','gateway','infra','support','margin','manager'];
+const ids=['discount','prompts','freq','reps','credits','cc','fx','fxtax','tax','gateway','infra','support','margin','manager'];
 
 function calc(){
   const discount=v('discount')/100;
   const fxEff=v('fx')*(1+v('fxtax')/100);
-  const collections=v('prompts')*REPS*v('freq');
-  const usage=v('util')/100, rate=v('tax')/100+v('gateway')/100, min=v('margin')/100;
+  const collections=v('prompts')*v('reps')*v('freq');
+  const rate=v('tax')/100+v('gateway')/100, min=v('margin')/100;
   const sel=ENGINES.filter(e=>e.on);
-  const perEngine=sel.map(e=>({name:e.name,value:e.cost*fxEff*collections*usage}));
+  const perEngine=sel.map(e=>({name:e.name,value:e.cost*fxEff*collections}));
   const monitor=perEngine.reduce((a,b)=>a+b.value,0);
-  const credits=v('credits')*v('cc')*fxEff*usage;
+  const credits=v('credits')*v('cc')*fxEff;
   const infra=v('infra'), support=v('support');
   const fixed=monitor+credits+infra+support;
   const floor=1-rate-min>0?fixed/(1-rate-min):NaN;
@@ -307,12 +302,12 @@ function calc(){
   const contribution=price-total, margin=price>0?contribution/price:NaN;
   const maxdisc=base>0&&Number.isFinite(floor)?Math.max(0,1-floor/base):NaN;
 
-  ENGINES.forEach(e=>{$('co-'+e.id).textContent=unit(e.cost*fxEff*REPS)+' por prompt'});
+  ENGINES.forEach(e=>{$('co-'+e.id).textContent=unit(e.cost*fxEff*v('reps'))+' por prompt'});
   $('engine-count').textContent=sel.length===1?'1 motor selecionado':`${sel.length} motores selecionados`;
 
-  const valid=Number.isFinite(base)&&base>0&&discount>=0&&discount<1&&v('prompts')>0&&sel.length>0&&v('fx')>0
+  const valid=Number.isFinite(base)&&base>0&&discount>=0&&discount<1&&v('prompts')>0&&v('reps')>=1&&sel.length>0&&v('fx')>0
     &&ids.every(id=>Number.isFinite(v(id))&&v(id)>=0)&&ENGINES.every(e=>Number.isFinite(e.cost)&&e.cost>=0)
-    &&rate+min<1&&v('util')<=100&&v('manager')<=99;
+    &&rate+min<1&&v('manager')<=99;
 
   let status,cls='';
   if(sel.length===0){status='SELECIONE AO MENOS UM MOTOR DE IA para calcular o plano';cls='bad'}
