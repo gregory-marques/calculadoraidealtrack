@@ -157,8 +157,9 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
       </div>
       <div class="field">
         <label for="credits">Créditos do plano / mês</label>
-        <input id="credits" type="number" value="590" min="0">
-        <span class="hint">Cada crédito vale uma conversa de chat ou um conteúdo do IdealAgent.</span>
+        <input id="credits" type="number" value="1300" min="0">
+        <span class="hint">Créditos da plataforma. Consumo por ação: conversa de chat 2, artigo completo 5 (esboço 1 + artigo 4), regeneração 4, prompt salvo do Advanced 1.</span>
+                <span class="hint">Preço efetivo por crédito no plano: <b id="credit-price">—</b> (avulso: R$ 0,50).</span>
       </div>
     </div>
   </section>
@@ -177,9 +178,9 @@ button.btn.secondary{background:var(--brand-soft);color:var(--brand-soft-ink)}
 
     <div class="fields" style="margin-top:16px">
       <div class="field">
-        <label for="cc">Custo por crédito (US$)</label>
-        <input id="cc" type="number" value="0.0728" min="0" step="0.0001">
-        <span class="hint">Média entre uma conversa de chat (US$ 0,0293) e um conteúdo do IdealAgent (US$ 0,1163), ambos com margem de 1,5×.</span>
+        <label for="cc">Custo por crédito para a Ideal Track (US$)</label>
+        <input id="cc" type="number" value="0.0291" min="0" step="0.0001">
+        <span class="hint">Um artigo completo consome 5 créditos (esboço 1 + artigo 4). A US$ 0,0291 por crédito, isso cobre US$ 0,1455: US$ 0,1163 do artigo, já medido, e até US$ 0,029 do esboço, ainda não medido. Supõe que o cliente gaste todos os créditos em artigos.</span>
       </div>
       <div class="field">
         <label for="fx">Câmbio (R$ por US$)</label>
@@ -300,6 +301,8 @@ function calc(){
   $('base').textContent=money(base);
   const price=base*(1-discount), tax=price*rate, total=tax+fixed;
   const contribution=price-total, margin=price>0?contribution/price:NaN;
+  const creditPrice=1-rate-min>0?v('cc')*fxEff/(1-rate-min)*(1-discount):NaN;
+  $('credit-price').textContent=money(creditPrice);
   const maxdisc=base>0&&Number.isFinite(floor)?Math.max(0,1-floor/base):NaN;
 
   ENGINES.forEach(e=>{$('co-'+e.id).textContent=unit(e.cost*fxEff*v('reps'))+' por prompt'});
@@ -332,7 +335,8 @@ function calc(){
     line('Impostos e gateway',money(tax))+
     line('Monitoramento',money(monitor))+
     perEngine.map(p=>line(p.name,money(p.value),'sub')).join('')+
-    line(`Créditos do plano (${n(v('credits'))} × ${unit(v('cc')*fxEff)})`,money(credits))+
+    line(`Custo dos créditos do plano (${n(v('credits'))} × ${unit(v('cc')*fxEff)})`,money(credits))+
+    line('Preço efetivo do crédito no plano (avulso: R$ 0,50)',money(creditPrice),'sub')+
     line('Infraestrutura',money(infra))+
     line('Suporte',money(support))+
     line('Custos totais',money(total))+
